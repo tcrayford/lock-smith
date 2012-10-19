@@ -54,13 +54,16 @@ module Locksmith
     end
 
     def table(name)
-      @table_lock.synchronize {tables[name].items}
+      unless tables[name]
+        @table_lock.synchronize do
+          tables[name] = dynamo.tables[name].load_schema
+        end
+      end
+      tables[name].items
     end
 
     def tables
-      @tables ||= dynamo.tables.
-        map {|t| t.load_schema}.
-        reduce({}) {|h, t| h[t.name] = t; h}
+      @tables ||= {}
     end
 
     def dynamo
