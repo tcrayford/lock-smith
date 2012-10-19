@@ -9,8 +9,6 @@ module Locksmith
     @dynamo_lock = Mutex.new
     @table_lock = Mutex.new
 
-    LOCK_TABLE = "Locks"
-
     def lock(name, opts={})
       opts[:ttl] ||= 60
       opts[:attempts] ||= 3
@@ -50,7 +48,7 @@ module Locksmith
     end
 
     def locks
-      table(LOCK_TABLE)
+      table(lock_table)
     end
 
     def table(name)
@@ -71,6 +69,14 @@ module Locksmith
         @db ||= AWS::DynamoDB.new(:access_key_id => Config.aws_id,
                                   :secret_access_key => Config.aws_secret)
       end
+    end
+
+    def lock_table
+      @lock_table
+    end
+
+    def lock_table=(table_name)
+      @lock_table = table_name
     end
 
   end
