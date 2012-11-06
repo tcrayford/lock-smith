@@ -1,5 +1,7 @@
 require 'zlib'
 require 'uri'
+require 'pg'
+
 module Locksmith
   module Pg
   extend self
