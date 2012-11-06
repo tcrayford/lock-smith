@@ -8,7 +8,7 @@ module Locksmith
   BACKOFF = 0.5
 
     def lock(name)
-      i = Zlib.crc32(name)
+      i = pg_lock_number(name)
       result = nil
       begin
         sleep(BACKOFF) until write_lock(i)
@@ -21,13 +21,27 @@ module Locksmith
       end
     end
 
+    def pg_lock_number(name)
+      i = Zlib.crc32(name)
+      # Anything bigger than 2147483647 needs to be wrapped
+      # negative, so treat the left most bit as the +/- flag
+      if i == 2147483648
+        # the wrap trick doesn't work for 2147483648
+        # as it would be 0
+        i = -i
+      elsif i > 2147483647
+        i = - "#{i.to_s(2)[1..-1]}".to_i(2)
+      end
+      i
+    end
+
     def write_lock(i)
-      r = conn.exec("select pg_try_advisory_lock($1)", [i])
+      r = conn.exec("select pg_try_advisory_lock($1,$2)", [lock_space,i])
       r[0]["pg_try_advisory_lock"] == "t"
     end
 
     def release_lock(i)
-      conn.exec("select pg_advisory_unlock($1)", [i])
+      conn.exec("select pg_advisory_unlock($1,$2)", [lock_space,i])
     end
 
     def conn=(conn)
@@ -53,6 +67,9 @@ module Locksmith
       Log.log({:ns => "postgresql-lock"}.merge(data), &blk)
     end
 
+    def lock_space
+      @lock_space ||= (ENV['LOCKSMITH_PG_LOCK_SPACE'] || '-2147483648').to_i
+    end
   end
 end
 
