@@ -7,17 +7,21 @@ module Locksmith
   extend self
   BACKOFF = 0.5
 
-    def lock(name)
+    def lock_space
+      @lock_space ||= (ENV['LOCKSMITH_PG_LOCK_SPACE'] || '-2147483648').to_i
+    end
+
+    def lock(name, lspace=lock_space)
       i = pg_lock_number(name)
       result = nil
       begin
-        sleep(BACKOFF) until write_lock(i)
+        sleep(BACKOFF) until write_lock(i, lspace)
         if block_given?
           result = yield
         end
         return result
       ensure
-        release_lock(i)
+        release_lock(i, lspace)
       end
     end
 
@@ -35,13 +39,13 @@ module Locksmith
       i
     end
 
-    def write_lock(i)
-      r = conn.exec("select pg_try_advisory_lock($1,$2)", [lock_space,i])
+    def write_lock(i, lspace)
+      r = conn.exec("select pg_try_advisory_lock($1,$2)", [lspace,i])
       r[0]["pg_try_advisory_lock"] == "t"
     end
 
-    def release_lock(i)
-      conn.exec("select pg_advisory_unlock($1,$2)", [lock_space,i])
+    def release_lock(i, lspace)
+      conn.exec("select pg_advisory_unlock($1,$2)", [lspace,i])
     end
 
     def conn=(conn)
@@ -67,9 +71,6 @@ module Locksmith
       Log.log({:ns => "postgresql-lock"}.merge(data), &blk)
     end
 
-    def lock_space
-      @lock_space ||= (ENV['LOCKSMITH_PG_LOCK_SPACE'] || '-2147483648').to_i
-    end
   end
 end
 
