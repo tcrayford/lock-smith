@@ -27,16 +27,12 @@ module Locksmith
 
     def pg_lock_number(name)
       i = Zlib.crc32(name)
-      # Anything bigger than 2147483647 needs to be wrapped
-      # negative, so treat the left most bit as the +/- flag
-      if i == 2147483648
-        # the wrap trick doesn't work for 2147483648
-        # as it would be 0
-        i = -i
-      elsif i > 2147483647
-        i = - "#{i.to_s(2)[1..-1]}".to_i(2)
+      # We need to wrap the value for postgres
+      if i > 2147483647
+        -(-(i) & 0xffffffff)
+      else
+        i
       end
-      i
     end
 
     def write_lock(i, lspace)
