@@ -12,7 +12,7 @@ module Locksmith
     end
 
     def lock(name, lspace=lock_space)
-      i = pg_lock_number(name)
+      i = key(name)
       result = nil
       begin
         sleep(BACKOFF) until write_lock(i, lspace)
@@ -25,7 +25,7 @@ module Locksmith
       end
     end
 
-    def pg_lock_number(name)
+    def key(name)
       i = Zlib.crc32(name)
       # We need to wrap the value for postgres
       if i > 2147483647
