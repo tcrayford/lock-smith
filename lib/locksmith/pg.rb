@@ -4,7 +4,7 @@ require 'pg'
 
 module Locksmith
   module Pg
-  extend self
+    extend self
     BACKOFF = 0.5
 
     def lock_space
