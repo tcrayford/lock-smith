@@ -1,13 +1,14 @@
-# Locksmith
-
-**This software is beta quality. Check back later for production quality.**
+# lock-smith
 
 A library of locking algorithms for a variety of data stores. Supported Data Stores:
 
 * DynamoDB
 * PostgreSQL
-* TODO: Doozerd
-* TODO: Zookeeper
+
+## Why Locksmith
+
+Locking code is tricky. Ideally, I would write it once, verify in production for
+a year then never think about it again.
 
 ## Usage
 
@@ -58,19 +59,9 @@ Locksmith::Pg.lock("my-resource") do
 end
 ```
 
-## Why Locksmith
-
-Locking code is tricky. Ideally, I would write it once, verify in production for
-a year then never think about it again.
-
 ## Hacking on Locksmith
 
 There are still some Data Stores to implement, follow the pattern for PostgreSQLand DynamoDB and submit a pull request.
-
-## Contributors
-
-* Ryan Smith
-* Blake Gentry
 
 ## License
 
