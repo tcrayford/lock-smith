@@ -5,7 +5,7 @@ A library of locking algorithms for a variety of data stores. Supported Data Sto
 * DynamoDB *
 * PostgreSQL
 
-* The DynamoDB code uses a TTL based lock expiration. You should be comfortable with the implecations outlined [here](https://gist.github.com/c95fd21fab91b0823328).
+\* The DynamoDB code uses a TTL based lock expiration. You should be comfortable with the implecations outlined [here](https://gist.github.com/c95fd21fab91b0823328).
 
 ## Usage
 
