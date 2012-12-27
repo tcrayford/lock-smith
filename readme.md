@@ -62,6 +62,8 @@ end
 #### Options
 
 * lspace - This defines which lock space lock-smith will use. This is handy if you have multiple applications using advisory locks.
+* ttl - Wraps your block in a timeout. Be sure to handle `Timeout::Error`.
+* attempts - Number of attempts to try advisory lock. Your code will only run once.
 
 ## Hacking on Locksmith
 
