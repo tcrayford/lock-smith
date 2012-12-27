@@ -5,11 +5,6 @@ A library of locking algorithms for a variety of data stores. Supported Data Sto
 * DynamoDB
 * PostgreSQL
 
-## Why Locksmith
-
-Locking code is tricky. Ideally, I would write it once, verify in production for
-a year then never think about it again.
-
 ## Usage
 
 There is only 1 public method:
