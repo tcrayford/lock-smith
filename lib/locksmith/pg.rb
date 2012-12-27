@@ -1,24 +1,22 @@
 require 'zlib'
 require 'uri'
 require 'pg'
+require 'timeout'
+require 'locksmith/config'
 
 module Locksmith
   module Pg
     extend self
-    BACKOFF = 0.5
 
     def lock(name, opts={})
+      opts[:ttl] ||= 60
+      opts[:attempts] ||= 3
       opts[:lspace] ||= (Config.pg_lock_space || -2147483648)
-      i = key(name)
-      result = nil
-      begin
-        sleep(BACKOFF) until write_lock(i, lspace)
-        if block_given?
-          result = yield
+
+      if create(name, opts)
+        begin Timeout::timeout(opts[:ttl]) {return(yield)}
+        ensure delete(name, opts)
         end
-        return result
-      ensure
-        release_lock(i, lspace)
       end
     end
 
@@ -32,13 +30,21 @@ module Locksmith
       end
     end
 
-    def write_lock(i, lspace)
-      r = conn.exec("select pg_try_advisory_lock($1,$2)", [lspace,i])
-      r[0]["pg_try_advisory_lock"] == "t"
+    def create(name, opts)
+      lock_args = [opts[:lspace], key(name)]
+      opts[:attempts].times.each do |i|
+        res = conn.exec("select pg_try_advisory_lock($1,$2)", lock_args)
+        if res[0]["pg_try_advisory_lock"] == "t"
+          return(true)
+        else
+          return(false) if i == (opts[:attempts] - 1)
+        end
+      end
     end
 
-    def release_lock(i, lspace)
-      conn.exec("select pg_advisory_unlock($1,$2)", [lspace,i])
+    def delete(name, opts)
+      lock_args = [opts[:lspace], key(name)]
+      conn.exec("select pg_advisory_unlock($1,$2)", lock_args)
     end
 
     def conn=(conn)
@@ -66,4 +72,3 @@ module Locksmith
 
   end
 end
-
