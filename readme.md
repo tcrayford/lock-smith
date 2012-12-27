@@ -59,6 +59,10 @@ Locksmith::Pg.lock("my-resource") do
 end
 ```
 
+#### Options
+
+* lspace - This defines which lock space lock-smith will use. This is handy if you have multiple applications using advisory locks.
+
 ## Hacking on Locksmith
 
 There are still some Data Stores to implement, follow the pattern for PostgreSQLand DynamoDB and submit a pull request.

@@ -14,6 +14,11 @@ module Locksmith
       !env(key).nil?
     end
 
+    def pg_lock_space
+      n = "LOCKSMITH_PG_LOCK_SPACE"
+      env(n) && env(n).to_i
+    end
+
     def aws_id
       @aws_id ||= env!("AWS_ID")
     end

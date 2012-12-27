@@ -7,11 +7,8 @@ module Locksmith
     extend self
     BACKOFF = 0.5
 
-    def lock_space
-      @lock_space ||= (ENV['LOCKSMITH_PG_LOCK_SPACE'] || '-2147483648').to_i
-    end
-
-    def lock(name, lspace=lock_space)
+    def lock(name, opts={})
+      opts[:lspace] ||= (Config.pg_lock_space || -2147483648)
       i = key(name)
       result = nil
       begin
