@@ -5,7 +5,7 @@ require 'pg'
 module Locksmith
   module Pg
   extend self
-  BACKOFF = 0.5
+    BACKOFF = 0.5
 
     def lock_space
       @lock_space ||= (ENV['LOCKSMITH_PG_LOCK_SPACE'] || '-2147483648').to_i
