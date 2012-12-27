@@ -1,6 +1,5 @@
 require 'zlib'
 require 'uri'
-require 'pg'
 require 'timeout'
 require 'locksmith/config'
 
