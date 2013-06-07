@@ -32,12 +32,8 @@ module Locksmith
     def create(name, opts)
       lock_args = [opts[:lspace], key(name)]
       opts[:attempts].times.each do |i|
-        res = conn.exec("select pg_try_advisory_lock($1,$2)", lock_args)
-        if res[0]["pg_try_advisory_lock"] == "t"
-          return(true)
-        else
-          return(false) if i == (opts[:attempts] - 1)
-        end
+        conn.exec("select pg_advisory_lock($1,$2)", lock_args)
+        return(true)
       end
     end
 
